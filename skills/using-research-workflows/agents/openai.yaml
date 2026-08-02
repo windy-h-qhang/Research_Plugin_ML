@@ -1,0 +1,4 @@
+interface:
+  display_name: "Using Research Workflows"
+  short_description: "Route ML research work safely by mode"
+  default_prompt: "Use $using-research-workflows to classify and route this research task."

@@ -1,0 +1,22 @@
+# Experiment Contract
+
+- Experiment ID: demo-confidence-gate
+- Hypothesis: The confidence gate reduces false positives without degrading recall.
+- Baselines: [vanilla-classifier]
+- Independent variables: [confidence-threshold]
+- Dependent variables: [precision, recall, f1]
+- Controlled variables: [model-architecture, dataset, data-split, preprocessing, training-budget, data-order-within-pair]
+- Comparison design: for each seed, run paired baseline and candidate arms with identical data order
+- Data split: 80/10/10 train/val/test
+- Leakage checks: []
+- Ablations: []
+- Primary metrics: [precision, recall]
+- Guardrail metrics: [f1]
+- Seeds: [7, 17, 29, 43, 71]
+- Repetitions: 5
+- Uncertainty unit: paired seed-level deltas
+- Resource request: local-cpu
+- Success rule: the 95% CI over paired seed-level precision deltas has a lower bound of at least 2pp, and the 95% CI over paired seed-level recall deltas has a lower bound of at least -1pp
+- Negative-result rule: the 95% CI over paired seed-level precision deltas has an upper bound below 2pp, or the 95% CI over paired seed-level recall deltas has an upper bound below -1pp
+- Inconclusive rule: neither the success nor negative-result rule is met, including when a 95% CI crosses a predeclared boundary or statistical power is insufficient
+- Expected artifacts: [metrics.json, confusion-matrix.png]

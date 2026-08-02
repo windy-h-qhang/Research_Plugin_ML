@@ -1,0 +1,4 @@
+interface:
+  display_name: "Validating Research Code"
+  short_description: "Validate research code by evidence layer"
+  default_prompt: "Use $validating-research-code to select and report the evidence needed for this research code change."

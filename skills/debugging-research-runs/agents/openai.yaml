@@ -1,0 +1,4 @@
+interface:
+  display_name: "Debugging Research Runs"
+  short_description: "Diagnose failed, stuck, or remote research runs"
+  default_prompt: "Use $debugging-research-runs to diagnose this failed or uncertain research run."

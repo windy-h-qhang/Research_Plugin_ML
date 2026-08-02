@@ -1,0 +1,4 @@
+interface:
+  display_name: "Framing Research Work"
+  short_description: "Clarify research scope and success criteria"
+  default_prompt: "Use $framing-research-work to turn this request into a clear research contract."

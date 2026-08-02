@@ -1,0 +1,4 @@
+interface:
+  display_name: "Designing Research Experiments"
+  short_description: "Build falsifiable ML experiment contracts"
+  default_prompt: "Use $designing-research-experiments to design a valid experiment for this hypothesis."

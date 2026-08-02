@@ -1,0 +1,9 @@
+{
+  "run_id": "demo-smoke",
+  "experiment_id": "demo-confidence-gate",
+  "environment_id": "local-demo",
+  "validation_level": "smoke",
+  "conclusion": "not_verified",
+  "command": "python train.py --config configs/demo.yaml --max-steps 20 --seed 7",
+  "status": "planned"
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Planning Research Changes"
+  short_description: "Plan verifiable research engineering tasks"
+  default_prompt: "Use $planning-research-changes to decompose this research change into independently verifiable tasks."

@@ -1,0 +1,9 @@
+{
+  "name": "research-engineering",
+  "description": "Evidence-driven research engineering workflows for PyTorch, LLM, and AI infrastructure projects.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Research Engineering Contributors"
+  },
+  "license": "MIT"
+}

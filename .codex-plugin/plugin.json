@@ -1,0 +1,33 @@
+{
+  "author": {
+    "name": "Research Engineering Contributors"
+  },
+  "description": "Evidence-driven research engineering workflows for PyTorch, LLM, and AI infrastructure projects.",
+  "interface": {
+    "brandColor": "#2563EB",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "category": "Developer Tools",
+    "defaultPrompt": [
+      "Help me design and validate a machine learning experiment.",
+      "Diagnose this PyTorch, LLM, or AI infrastructure research issue."
+    ],
+    "developerName": "Research Engineering Contributors",
+    "displayName": "Research Engineering",
+    "longDescription": "Classify research work by mode and domain, plan experiments, validate PyTorch and LLM code, debug local and remote runs, orchestrate reviewers, and separate execution evidence from scientific conclusions.",
+    "shortDescription": "Research workflows for ML and AI infrastructure"
+  },
+  "keywords": [
+    "research",
+    "pytorch",
+    "machine-learning",
+    "llm",
+    "ai-infrastructure",
+    "slurm",
+    "ssh",
+    "reproducibility"
+  ],
+  "license": "MIT",
+  "name": "research-engineering",
+  "skills": "./skills/",
+  "version": "0.1.0"
+}

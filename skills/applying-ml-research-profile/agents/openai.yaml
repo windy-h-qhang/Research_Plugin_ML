@@ -1,0 +1,4 @@
+interface:
+  display_name: "Applying ML Research Profile"
+  short_description: "Apply ML-specific checks for leakage, class imbalance, calibration, and tensor/dtype/gradient correctness"
+  default_prompt: "Use $applying-ml-research-profile to apply ML-specific rigor to this research work."

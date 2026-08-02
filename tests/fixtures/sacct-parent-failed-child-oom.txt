@@ -1,0 +1,2 @@
+123|FAILED|1:0|00:01:00||/logs/job-123.out|/logs/job-123.err
+123.batch|OUT_OF_MEMORY|0:125|00:01:00|20G|/logs/job-123.batch.out|/logs/job-123.batch.err

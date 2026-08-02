@@ -1,0 +1,4 @@
+interface:
+  display_name: "Orchestrating Research Agents"
+  short_description: "Assign safe research implementation and review roles"
+  default_prompt: "Use $orchestrating-research-agents to assign safe implementation and independent review roles for this research task."

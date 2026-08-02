@@ -1,0 +1,4 @@
+interface:
+  display_name: "Applying AI Infra Profile"
+  short_description: "Apply AI-infrastructure checks for correctness, measurement, reporting, and resilience before performance claims"
+  default_prompt: "Use $applying-ai-infra-profile to apply AI infrastructure rigor to this research work."

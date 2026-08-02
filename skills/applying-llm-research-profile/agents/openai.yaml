@@ -1,0 +1,4 @@
+interface:
+  display_name: "Applying LLM Research Profile"
+  short_description: "Apply LLM-specific checks for tokenizer/chat template, label masking, packing, data contamination, decoding settings, checkpoint correctness, and KV-cache compatibility"
+  default_prompt: "Use $applying-llm-research-profile to apply LLM-specific rigor to this research work."

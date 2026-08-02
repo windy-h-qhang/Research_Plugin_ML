@@ -1,0 +1,2 @@
+123|COMPLETED|0:0|00:10:00||/logs/job-123.out|/logs/job-123.err
+123.batch|COMPLETED|0:0|00:10:00|4G|/logs/job-123.batch.out|/logs/job-123.batch.err

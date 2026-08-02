@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "run_id",
+    "experiment_id",
+    "status",
+    "environment_id",
+    "command"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {"status": {"const": "planned"}},
+        "required": ["status"]
+      },
+      "else": {"required": ["started_at"]}
+    }
+  ],
+  "properties": {
+    "run_id": {"type": "string", "minLength": 1},
+    "experiment_id": {"type": "string", "minLength": 1},
+    "status": {
+      "enum": ["planned", "queued", "running", "completed", "failed", "cancelled", "unknown"]
+    },
+    "environment_id": {"type": "string", "minLength": 1},
+    "command": {"type": "string", "minLength": 1},
+    "started_at": {"type": "string", "minLength": 1},
+    "ended_at": {"type": ["string", "null"]},
+    "git": {"type": "object"},
+    "config": {"type": "object"},
+    "seeds": {"type": "array"},
+    "artifacts": {"type": "array"},
+    "scheduler": {"type": "object"},
+    "environment": {"type": "object"},
+    "failure": {"type": ["object", "null"]}
+  },
+  "additionalProperties": true
+}

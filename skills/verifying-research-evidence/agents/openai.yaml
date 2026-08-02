@@ -1,0 +1,4 @@
+interface:
+  display_name: "Verify Research Evidence"
+  short_description: "Separate code, run, and conclusion verdicts"
+  default_prompt: "Use $verifying-research-evidence to audit this research claim against the available evidence."
