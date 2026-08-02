@@ -1,0 +1,12 @@
+.DS_Store
+.worktrees/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.*
+!.env.example
+*.zip
+dist/
+tmp/
+.local-history/

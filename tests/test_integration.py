@@ -41,8 +41,32 @@ class IntegrationTests(unittest.TestCase):
 
     def test_readme_documents_user_priority_for_agent_fallback(self) -> None:
         readme = (ROOT / "README.md").read_text()
-        self.assertIn("用户显式要求停止", readme)
-        self.assertIn("未指定降级偏好", readme)
+        self.assertIn("honor a user's explicit request to stop", readme)
+        self.assertRegex(
+            readme,
+            r"When no fallback\s+preference is specified",
+        )
+
+    def test_readme_language_variants_are_linked(self) -> None:
+        readme = (ROOT / "README.md").read_text()
+        chinese_readme = ROOT / "docs" / "README.zh-CN.md"
+        english_validation = ROOT / "docs" / "real-environment-validation.md"
+        chinese_validation = (
+            ROOT / "docs" / "real-environment-validation.zh-CN.md"
+        )
+        self.assertTrue(chinese_readme.is_file())
+        self.assertTrue(english_validation.is_file())
+        self.assertTrue(chinese_validation.is_file())
+        self.assertIn("[简体中文](docs/README.zh-CN.md)", readme)
+        self.assertIn("[English](../README.md)", chinese_readme.read_text())
+        self.assertIn(
+            "[简体中文](real-environment-validation.zh-CN.md)",
+            english_validation.read_text(),
+        )
+        self.assertIn(
+            "[English](real-environment-validation.md)",
+            chinese_validation.read_text(),
+        )
 
     def test_all_manifest_skills_are_valid(self) -> None:
         self.assertEqual(len(EXPECTED_SKILLS), 11)
@@ -183,20 +207,21 @@ class IntegrationTests(unittest.TestCase):
             "codex plugin remove research-engineering@personal",
             readme,
         )
-        self.assertIn("不需要执行\n`codex plugin marketplace add`", readme)
+        self.assertIn("not require\n`codex plugin marketplace add`", readme)
         self.assertIn("$env:USERPROFILE\\.agents\\plugins\\marketplace.json", readme)
         self.assertIn("claude --plugin-dir .\\research-engineering", readme)
         self.assertIn("/research-engineering:using-research-workflows", readme)
         self.assertNotIn("/Users/", readme)
         self.assertNotIn("@gmail.com", readme)
-        self.assertIn("新 task", readme)
+        self.assertIn("new task", readme)
         self.assertRegex(
             readme,
-            r"卸载插件不会删除研究\s+项目中的 `\.research/`",
+            r"Uninstalling the plugin does not delete a research project's\s+"
+            r"`\.research/`",
         )
         marketplace_match = re.search(
-            r"`~/\.agents/plugins/marketplace\.json`"
-            r" 的最小内容为：\n\n```json\n(.*?)\n```",
+            r"The minimal contents of `~/\.agents/plugins/marketplace\.json`"
+            r" are:\n\n```json\n(.*?)\n```",
             readme,
             re.DOTALL,
         )
@@ -223,8 +248,8 @@ class IntegrationTests(unittest.TestCase):
 - Override: user may override classification/workflow mode; platform safety remains binding
 - Next Skill: framing-research-work→designing-research-experiments"""
         self.assertIn(expected_router, readme)
-        self.assertIn("用户指令始终覆盖自动判断", readme)
-        self.assertIn("不能取消平台安全边界", readme)
+        self.assertIn("User instructions always override automatic classification", readme)
+        self.assertIn("cannot waive platform safety boundaries", readme)
 
     def test_example_review_discloses_that_no_training_was_executed(self) -> None:
         review_path = (
@@ -256,14 +281,14 @@ class IntegrationTests(unittest.TestCase):
 
     def test_readme_does_not_promote_the_synthetic_record_to_evidence(self) -> None:
         readme = (ROOT / "README.md").read_text()
-        self.assertIn("它不表示本仓库真的执行过训练", readme)
+        self.assertIn("It does not mean this repository has run training.", readme)
         self.assertIn('"status": "planned"', readme)
         self.assertNotIn('"status": "completed"', readme)
-        self.assertNotIn("记录中完成的 Smoke", readme)
+        self.assertNotIn("recorded completed Smoke", readme)
         expected = """\
-Code verification: not_verified — 尚未执行确定性、回归或 Smoke 验证。
-Experiment execution: not_verified — 正式多种子实验与阈值扫描尚未执行。
-Conclusion support: not_verified — 尚无效应量、统计比较或基线证据。"""
+Code verification: not_verified — no deterministic, regression, or smoke validation has run.
+Experiment execution: not_verified — formal multi-seed experiments and threshold sweeps have not run.
+Conclusion support: not_verified — no effect size, statistical comparison, or baseline evidence is available."""
         self.assertIn(expected, readme)
 
 

@@ -1,103 +1,114 @@
 # Research Engineering
 
-面向深度学习、大模型与 AI 基础设施研究的独立 Agent 插件，以 Codex 为主要
-宿主，并提供 Claude Code 兼容层。它采用规格驱动、隔离调试、独立审查和
-分层验证，同时根据研究阶段调整流程强度。首版以 PyTorch 生态为第一等支持
-对象。
+> Language: English | [简体中文](docs/README.zh-CN.md)
 
-> 本项目不是需要编译的 Python 包或桌面应用。Codex 在运行时读取其中的
-> Markdown、JSON 和 Python 脚本；所谓“构建”是结构校验、自动化测试和生成
-> 源码归档。ZIP 本身不是可以双击安装的插件安装器。
+An independent Agent plugin for deep learning, large-language-model, and AI
+infrastructure research. Codex is the primary host and Claude Code is supported
+through a compatibility layer. The plugin combines specification-driven work,
+isolated debugging, independent review, and layered validation, adapting its
+workflow strength to the maturity of the research task. PyTorch is the
+first-class ecosystem in this initial release.
 
-## 0. 五分钟快速开始
+> This is not a Python package or desktop application that must be compiled.
+> Codex reads the Markdown, JSON, and Python files at runtime. “Build” means
+> structural checks, automated tests, and source archives; a ZIP is not a
+> double-click installer.
 
-先将公开仓库地址替换到下面的命令中，然后克隆并用 VS Code 打开：
+## 0. Five-minute quick start
+
+Clone the public repository and open it in VS Code:
 
 ```bash
-git clone https://github.com/windy-h-qhang/research_plugin.git research-engineering
+git clone https://github.com/windy-h-qhang/Research_Plugin_ML.git research-engineering
 cd research-engineering
 code .
 ```
 
-这些命令可在 macOS/Linux Shell、Windows PowerShell 和 WSL 中使用。如果
-`code` 不在 PATH 中，也可以在 VS Code 选择 **File → Open Folder…**，然后
-打开克隆得到的 `research-engineering` 文件夹。
+The commands work in macOS/Linux shells, Windows PowerShell, and WSL. If
+`code` is not on `PATH`, use **File → Open Folder…** in VS Code and open the
+cloned `research-engineering` directory.
 
-第一次阅读建议从这些文件开始：
+Start with these files:
 
-| 路径 | 用途 |
-|------|------|
-| `.codex-plugin/plugin.json` | Codex 插件名称、版本和入口 |
-| `.claude-plugin/plugin.json` | Claude Code 兼容层的名称、版本和描述 |
-| `skills/*/SKILL.md` | 8 个共享核心 Skills 与 3 个可组合 Profiles |
-| `scripts/` | 初始化、环境捕获、运行记录和证据汇总工具 |
-| `templates/` | 研究上下文、实验、运行和审查模板 |
-| `examples/minimal-project/` | 合成的最小使用示例，不代表真实研究结果 |
-| `tests/` | Manifest、Skills、脚本、集成和行为测试 |
-| `docs/real-environment-validation.md` | 真实 GPU、SSH、Slurm、云 GPU 和 Marketplace 的验收边界 |
+| Path | Purpose |
+| --- | --- |
+| `.codex-plugin/plugin.json` | Codex plugin identity, version, and entry point |
+| `.claude-plugin/plugin.json` | Claude Code compatibility identity and description |
+| `skills/*/SKILL.md` | Eight shared core Skills and three composable Profiles |
+| `scripts/` | Research-state initialization, environment capture, run records, and evidence summaries |
+| `templates/` | Research-context, experiment, run, and review templates |
+| `examples/minimal-project/` | A synthetic minimal example, not real research results |
+| `tests/` | Manifest, Skill, script, integration, and behavior tests |
+| `docs/real-environment-validation.md` | Boundaries for real GPU, SSH, Slurm, cloud GPU, and Marketplace validation |
 
-无需安装依赖即可运行离线测试：
+Run the offline suite without installing dependencies:
 
 ```bash
 python3 -m unittest discover -s tests -v
 ```
 
-## 1. 定位与适用范围
+## 1. Scope
 
-本插件为以下场景设计：
+Research Engineering is designed for:
 
-- **PyTorch 生态**：模型训练、分布式、推理、CUDA/Triton 算子；
-- **大模型研究**：Hugging Face、DeepSpeed/FSDP、PEFT/TRL、vLLM；
-- **AI 基础设施**：GPU 集群、Slurm、通信优化、吞吐与延迟工程；
-- **可复现研究**：论文实验、Benchmark、消融研究、开源发布。
+- **The PyTorch ecosystem:** training, distributed systems, inference, and
+  CUDA/Triton kernels.
+- **LLM research:** Hugging Face, DeepSpeed/FSDP, PEFT/TRL, and vLLM.
+- **AI infrastructure:** GPU clusters, Slurm, communication optimization, and
+  throughput or latency engineering.
+- **Reproducible research:** paper experiments, benchmarks, ablations, and
+  open-source releases.
 
-**不适用**于：JAX/TensorFlow 深度专属支持（首版以 PyTorch 为第一等公民）、自动创建云资源、管理 SSH 凭据或大型数据集。
+It does not provide deep, framework-specific JAX or TensorFlow support in this
+release; it does not create cloud resources, manage SSH credentials, or manage
+large datasets automatically.
 
-## 2. 与 Superpowers 的区别
+## 2. Relationship to Superpowers
 
-| 维度 | Superpowers | Research Engineering |
-|------|-------------|----------------------|
-| 主要定位 | 通用软件工程工作流与开发纪律 | 研究代码、实验执行与研究证据 |
-| 验证重点 | 对功能与缺陷修复强调测试先行和完成前验证 | 按证据层选择确定性测试、不变量、Smoke、回归或统计验证 |
-| 计划粒度 | 偏向可快速执行、可逐项验证的实现步骤 | 按可独立审查的研究或工程单元拆分，不强制固定分钟数 |
-| 审查角色 | 通用实现、规格与代码质量审查 | Implementer + Scientific/Engineering/Reproducibility Reviewer |
-| 领域规则 | 可用于通用工程任务 | 三个可组合 Profile：ML、LLM、AI Infra |
-| 研究运行约定 | 不作为本插件文档的声明对象 | 明确定义本地、SSH、Slurm、云端 GPU、`.research/` 与成本门禁 |
+| Dimension | Superpowers | Research Engineering |
+| --- | --- | --- |
+| Primary focus | General software-engineering workflow and discipline | Research code, experiment execution, and research evidence |
+| Validation | Test-first and completion validation for features and defects | Deterministic, invariant, smoke, regression, or statistical validation selected by evidence level |
+| Planning unit | Quickly executable, individually verifiable steps | Independently reviewable research or engineering units |
+| Review roles | General implementation, specification, and code-quality review | Implementer plus Scientific, Engineering, or Reproducibility Reviewer |
+| Domain rules | General engineering tasks | Composable ML, LLM, and AI Infra Profiles |
+| Research execution | Not defined by this plugin | Local, SSH, Slurm, cloud GPU, `.research/`, and cost gates |
 
-两套插件相互独立，Skill 名称无冲突，可以同时使用。Research Engineering
-不会修改、覆盖或依赖 Superpowers；上表只说明两者的主要关注点，不表示
-Superpowers 不能处理远端、研究或成本相关任务。
+The plugins are independent and can coexist. Research Engineering never
+modifies, replaces, or depends on Superpowers, and it avoids Skill-name
+conflicts. The comparison describes different emphases; it does not imply that
+Superpowers cannot be used for research or remote work.
 
-## 3. 平台、验证、打包与安装
+## 3. Platforms, validation, packaging, and installation
 
-### 3.1 平台支持边界
+### 3.1 Platform boundaries
 
-| 平台 | 建议方式 | 当前边界 |
-|------|----------|----------|
-| macOS | 原生 Terminal、VS Code、Codex | 已运行离线测试；真实 GPU/SSH/Slurm 仍需按环境验收 |
-| Linux | 原生 Shell、VS Code、Codex | 设计为支持；尚未覆盖所有发行版和 GPU 驱动组合 |
-| Windows | 优先使用 WSL2；编辑和临时加载可用 PowerShell | 原生 Windows 未完成端到端验证，安全写入脚本可能因缺少 POSIX 文件原语而拒绝执行 |
-| SSH/Slurm | 从 macOS、Linux 或 WSL2 连接 Unix-like 远端 | 只使用已有 SSH Host Alias；提交作业仍需授权 |
+| Platform | Recommended route | Current boundary |
+| --- | --- | --- |
+| macOS | Native Terminal, VS Code, and Codex | Offline tests have run; real GPU/SSH/Slurm still need environment-specific validation |
+| Linux | Native shell, VS Code, and Codex | Designed to work; not every distribution and GPU-driver combination is covered |
+| Windows | Prefer WSL2; use PowerShell for editing and temporary loading | Native Windows is not end-to-end validated; safe-write scripts may refuse to run without POSIX primitives |
+| SSH/Slurm | Connect from macOS, Linux, or WSL2 to a Unix-like remote | Use only an existing SSH host alias; job submission requires authorization |
 
-Windows 用户若只阅读 Skills 或编辑 Markdown，可以使用原生 VS Code。若需要
-运行 `init_research_state.py`、`record_run.py`、SSH 或 Slurm 工作流，推荐在
-WSL2 中使用本插件。不要把“能够加载 Skills”误报为“全部辅助脚本已在该平台
-验证通过”。
+Native Windows is fine for reading Skills and editing Markdown. Use WSL2 for
+`init_research_state.py`, `record_run.py`, SSH, or Slurm workflows. Loading a
+Skill is not evidence that every helper script has been validated on that
+platform.
 
-### 3.2 环境要求与离线验证
+### 3.2 Requirements and offline validation
 
-- Git：克隆源码、检查版本状态和生成可复现归档；
-- Python 3：辅助脚本只依赖标准库，测试使用 `unittest`；
-- Codex 或 Claude Code：至少安装一个插件宿主；
-- VS Code：可选，仅用于阅读和编辑。
+- Git for cloning, status checks, and reproducible archives.
+- Python 3; helper scripts use the standard library and tests use `unittest`.
+- Codex or Claude Code as at least one plugin host.
+- VS Code is optional, for reading and editing only.
 
-宿主安装与命令变化请以
-[Codex 官方文档](https://developers.openai.com/codex/cli)和
-[Claude Code 官方文档](https://code.claude.com/docs/en/setup)为准；插件机制
-分别见 [Codex Plugins](https://developers.openai.com/plugins/build/plugins) 和
-[Claude Code Plugins](https://code.claude.com/docs/en/plugins)。
+Refer to the official [Codex CLI](https://developers.openai.com/codex/cli) and
+[Claude Code setup](https://code.claude.com/docs/en/setup) documentation for
+host installation and changing commands. See [Codex Plugins](https://developers.openai.com/plugins/build/plugins)
+and [Claude Code Plugins](https://code.claude.com/docs/en/plugins) for their
+plugin mechanisms.
 
-macOS、Linux 或 WSL：
+macOS, Linux, or WSL:
 
 ```bash
 git --version
@@ -108,7 +119,7 @@ python3 -m json.tool .codex-plugin/plugin.json >/dev/null
 git diff --check
 ```
 
-Windows PowerShell：
+Windows PowerShell:
 
 ```powershell
 git --version
@@ -119,20 +130,22 @@ py -3 -m json.tool .codex-plugin/plugin.json > $null
 git diff --check
 ```
 
-本项目没有 `pip install`、`npm install`、CMake 或二进制编译步骤。以上检查
-就是本项目的本地构建门。如本机提供 OpenAI `plugin-creator`，还可以运行其
-`validate_plugin.py` 验证插件结构。
+There is no `pip install`, `npm install`, CMake, or binary-build step. These
+checks are the local build gate. If OpenAI's `plugin-creator` validator is
+already available, it can also validate the plugin structure.
 
-这些检查不证明真实 GPU、SSH、Slurm、云 GPU 或公开 Marketplace 已完成
-端到端验收，也不证明某种研究方法优于基线。完整边界见
-`docs/real-environment-validation.md`。
+Passing these checks does not validate real GPU, SSH, Slurm, cloud GPU, or a
+public Marketplace installation, and does not establish that a research method
+outperforms a baseline. See `docs/real-environment-validation.md` for the
+complete boundary.
 
-### 3.3 生成发布 ZIP
+### 3.3 Create a release ZIP
 
-`git archive` 只包含已经提交到 `HEAD` 的文件。打包前应先审查并提交准备
-发布的改动；生成的 ZIP 放在已忽略的 `dist/`，不要提交回源码仓库。
+`git archive` includes only files committed to `HEAD`. Review and commit the
+intended release first; place the resulting ZIP in ignored `dist/` and never
+commit it back to the source repository.
 
-macOS、Linux 或 WSL：
+macOS, Linux, or WSL:
 
 ```bash
 mkdir -p dist
@@ -145,19 +158,8 @@ git archive \
 unzip -t dist/research-engineering-0.1.0.zip
 ```
 
-校验 SHA-256 时，macOS 使用：
-
-```bash
-shasum -a 256 dist/research-engineering-0.1.0.zip
-```
-
-Linux 使用：
-
-```bash
-sha256sum dist/research-engineering-0.1.0.zip
-```
-
-Windows PowerShell：
+Use `shasum -a 256` on macOS or `sha256sum` on Linux to calculate a SHA-256
+digest. In Windows PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Force dist | Out-Null
@@ -171,17 +173,18 @@ tar -tf dist/research-engineering-0.1.0.zip
 Get-FileHash dist/research-engineering-0.1.0.zip -Algorithm SHA256
 ```
 
-ZIP 是源码分发产物，不是可双击安装的应用，也不应直接解压到 Codex 的运行时
-缓存目录。
+The ZIP is a source-distribution artifact, not a double-click installer. Do
+not extract it into a Codex runtime-cache directory.
 
-### 3.4 安装到 Codex：个人 Marketplace
+### 3.4 Install in Codex through a personal Marketplace
 
-公开用户最简单的安装方式是把插件放在个人插件目录，并在个人 Marketplace
-中添加条目。下面的 `OWNER/REPOSITORY` 必须替换为真实公开仓库。
+For public users, place the source in a personal plugin directory and add a
+personal Marketplace entry. Replace `OWNER/REPOSITORY` with the actual public
+repository.
 
-#### 第一步：放置插件源码
+#### Step 1: place the source
 
-macOS、Linux 或 WSL：
+macOS, Linux, or WSL:
 
 ```bash
 mkdir -p ~/plugins
@@ -190,7 +193,7 @@ git clone \
   ~/plugins/research-engineering
 ```
 
-Windows PowerShell：
+Windows PowerShell:
 
 ```powershell
 New-Item -ItemType Directory -Force "$env:USERPROFILE\plugins" | Out-Null
@@ -199,18 +202,19 @@ git clone `
   "$env:USERPROFILE\plugins\research-engineering"
 ```
 
-#### 第二步：添加个人 Marketplace 条目
+#### Step 2: add the Marketplace entry
 
-个人 Marketplace 文件位于：
+The personal Marketplace file is:
 
-- macOS、Linux、WSL：`~/.agents/plugins/marketplace.json`；
-- Windows：`$env:USERPROFILE\.agents\plugins\marketplace.json`。
+- macOS, Linux, and WSL: `~/.agents/plugins/marketplace.json`;
+- Windows: `$env:USERPROFILE\.agents\plugins\marketplace.json`.
 
-文件名必须严格为 `marketplace.json`。`.codex-plugin/plugin.json` 是插件自身
-Manifest，两者不能混用。如果个人 Marketplace 已经存在，应把下面的插件
-对象合并到其 `plugins` 数组，不要覆盖其他已安装插件。
+The filename must be exactly `marketplace.json`. Do not confuse it with the
+plugin's `.codex-plugin/plugin.json`. If a personal Marketplace already
+exists, merge the plugin object into its `plugins` array rather than replacing
+other installed plugins.
 
-`~/.agents/plugins/marketplace.json` 的最小内容为：
+The minimal contents of `~/.agents/plugins/marketplace.json` are:
 
 ```json
 {
@@ -235,14 +239,14 @@ Manifest，两者不能混用。如果个人 Marketplace 已经存在，应把�
 }
 ```
 
-创建目录：
+Create or open the file:
 
 ```bash
 mkdir -p ~/.agents/plugins
 code ~/.agents/plugins/marketplace.json
 ```
 
-Windows PowerShell 对应命令：
+Windows PowerShell:
 
 ```powershell
 New-Item `
@@ -251,55 +255,40 @@ New-Item `
 code "$env:USERPROFILE\.agents\plugins\marketplace.json"
 ```
 
-将上面的 JSON 粘贴到打开的文件并保存。没有 `code` 命令时，可用任意纯文本
-编辑器创建同名文件；不要保存成 `marketplace.json.txt`。
+Use a plain-text editor if `code` is unavailable; do not accidentally save
+`marketplace.json.txt`.
 
-#### 第三步：安装并在 Codex 软件端载入
+#### Step 3: install and load it in Codex
 
-默认个人 Marketplace 会被 Codex 自动发现，不需要执行
-`codex plugin marketplace add`：
+The normal personal Marketplace is discovered automatically, so this flow does
+not require
+`codex plugin marketplace add`:
 
 ```bash
 codex plugin add research-engineering@personal
 codex plugin list
 ```
 
-`codex plugin list` 中应出现 `research-engineering@personal`，并显示为已安装。
+`codex plugin list` should show `research-engineering@personal` as installed.
 
-##### macOS：Codex 桌面端
+On macOS, fully quit and reopen the ChatGPT desktop app, switch to **Codex**,
+then open **Plugins** or **Plugins Directory**. Open **Personal Plugins →
+Research Engineering** and choose **Install** or **Enable**. If the CLI
+installation succeeded, it should show **Installed**; confirm that it is
+enabled. Create a new task rather than reusing a task that was open before the
+installation, then ask it to state the mode and Profiles it would use.
 
-1. 完全退出并重新打开 ChatGPT 桌面应用；
-2. 在顶部切换器中选择 **Codex**；
-3. 打开 **Plugins** 或 **Plugins Directory**；
-4. 选择 **Personal Plugins**，打开 **Research Engineering**；
-5. 点击 **Install** 或 **Enable**。如果前面的 CLI 安装已成功，此处应显示
-   **Installed**，只需确认插件处于开启状态；
-6. 新建一个 **task**，不要继续复用安装前已经打开的 task；
-7. 输入“请使用 Research Engineering 说明将采用的 Mode 和 Profiles”，确认
-   新 task 能发现插件 Skills。
+On Windows, first complete the Marketplace steps in **Windows PowerShell** and
+run the two CLI commands above. Fully quit and reopen the Windows ChatGPT/Codex
+app, then follow **Codex → Plugins / Plugins Directory → Personal Plugins →
+Research Engineering**. The Windows desktop application reads the Windows user
+directory; configuring only WSL's `~/.agents/plugins/marketplace.json` will not
+normally make the plugin appear in the Windows desktop app. WSL is better for
+the project's Python, SSH, and Slurm workflows.
 
-##### Windows：Codex 桌面端
+### 3.5 Team or repository Marketplace
 
-必须先在 **Windows PowerShell** 中完成前两步，把 Marketplace 写到
-`$env:USERPROFILE\.agents\plugins\marketplace.json`，再执行：
-
-```powershell
-codex plugin add research-engineering@personal
-codex plugin list
-```
-
-随后完全退出并重新打开 Windows 上的 ChatGPT/Codex 应用，依次进入
-**Codex → Plugins / Plugins Directory → Personal Plugins → Research
-Engineering**，点击 **Install** 或 **Enable**，最后新建 task 验证。
-
-Windows 桌面应用读取的是 Windows 用户目录。仅在 WSL 的
-`~/.agents/plugins/marketplace.json` 中配置，通常不会自动出现在 Windows
-桌面应用中；要给桌面应用安装，请使用上面的 PowerShell 路径。WSL 更适合
-运行本项目的 Python、SSH 和 Slurm 工作流。
-
-### 3.5 团队或仓库 Marketplace
-
-团队维护者可以创建独立 Marketplace 根目录：
+Maintainers can create a separate Marketplace root:
 
 ```text
 marketplace-root/
@@ -311,7 +300,7 @@ marketplace-root/
     └── scripts/
 ```
 
-这种非默认 Marketplace 需要显式注册：
+This non-default Marketplace must be registered explicitly:
 
 ```bash
 codex plugin marketplace add /path/to/marketplace-root
@@ -319,249 +308,240 @@ codex plugin marketplace list
 codex plugin add research-engineering@marketplace-name
 ```
 
-Windows PowerShell 可将 `/path/to/marketplace-root` 换成类似
-`C:\path\to\marketplace-root` 的真实路径。`source.path` 必须以 Marketplace
-根目录为基准，并使用 `./plugins/research-engineering`。
+In Windows PowerShell, replace `/path/to/marketplace-root` with a real Windows
+path. `source.path` is relative to the Marketplace root and must remain
+`./plugins/research-engineering`.
 
-### 3.6 在 Claude Code 中载入
+### 3.6 Load in Claude Code
 
-本仓库以 Codex 为主要宿主，同时提供 `.claude-plugin/plugin.json` 兼容层。
-Claude Code 会从插件根目录的 `skills/` 读取 Skills。这里使用官方的
-`--plugin-dir` 开发加载方式；它只对本次启动的 Claude Code 会话生效，不等于
-已经安装到 Claude Marketplace。
+Codex is the primary host, but this repository also provides
+`.claude-plugin/plugin.json`. Claude Code reads Skills from `skills/`. The
+official `--plugin-dir` route below is a development-time load for one Claude
+Code session; it is not an installation in Claude Marketplace.
 
-> Claude Code 是在终端中运行的 Agent。下面的操作不是 Claude Desktop
-> 聊天应用的扩展安装流程。
+> Claude Code is a terminal Agent. These instructions do not apply to the
+> Claude Desktop chat application.
 
-#### macOS：Claude Code
-
-如果已经按 Codex 步骤把仓库克隆到 `~/plugins/research-engineering`：
+macOS:
 
 ```bash
 cd ~/plugins
 claude --plugin-dir ./research-engineering
 ```
 
-如果当前终端已经位于插件根目录，也可以执行：
+From the plugin root, use `claude --plugin-dir .` instead.
 
-```bash
-claude --plugin-dir .
-```
-
-#### Windows：Claude Code
-
-在 Windows PowerShell 中执行：
+Windows PowerShell:
 
 ```powershell
 Set-Location "$env:USERPROFILE\plugins"
 claude --plugin-dir .\research-engineering
 ```
 
-若在 WSL2 中运行 Claude Code，应使用 WSL 路径，而不是 Windows
-`$env:USERPROFILE`：
+In WSL2, use the WSL path:
 
 ```bash
 cd ~/plugins
 claude --plugin-dir ./research-engineering
 ```
 
-#### 确认 Claude Code 已载入
+In Claude Code, use `/help` to find the `research-engineering` namespace; try
+`/research-engineering:using-research-workflows`; inspect **Errors** through
+`/plugin` if it is missing; and use `/reload-plugins` after edits. Long-lived
+Marketplace installation, upgrades, and public release have a separate
+distribution process and are not end-to-end validated here.
 
-进入 Claude Code 后：
+### 3.7 Use after installation
 
-1. 运行 `/help`，查找命名空间为 `research-engineering` 的 Skills；
-2. 尝试 `/research-engineering:using-research-workflows`，或直接用自然语言要求
-   Claude 使用 Research Engineering；
-3. 如果没有发现插件，运行 `/plugin` 并查看 **Errors**；
-4. 修改插件文件后运行 `/reload-plugins`，或退出后重新执行 `--plugin-dir` 命令。
-
-Claude 的长期 Marketplace 安装、升级和公开发布使用另一套 Marketplace 清单
-与分发流程，本版本尚未完成该端到端验收。不要把本节的本地临时加载表述为
-“已经发布到 Claude Marketplace”。
-
-### 3.7 安装后如何使用
-
-插件通过自然语言任务触发，不需要导入 Python 模块。建议明确目标、模式、
-Profile、执行环境和预算。例如：
+Use natural-language tasks; no Python import is needed. State the goal, mode,
+Profiles, execution environment, and budget explicitly. For example:
 
 ```text
-请使用 Research Engineering，以 experiment 模式和 ML Profile 检查这个
-PyTorch 分类实验。先建立 .research 上下文和实验契约，只运行 CPU 单元测试，
-不要下载数据、不要使用 GPU，也不要把一次 smoke test 当作科学结论。
+Use Research Engineering in experiment mode with the ML Profile to inspect this
+PyTorch classification experiment. First create a .research context and
+experiment contract; run CPU unit tests only; do not download data or use a
+GPU; and do not treat one smoke test as a scientific conclusion.
 ```
 
 ```text
-请使用 LLM + AI Infra Profiles 审查这个 vLLM benchmark。先做只读检查，
-列出吞吐、P50/P95 延迟、峰值显存和正确性门槛；未经我授权不要启动远端任务。
+Use the LLM and AI Infra Profiles to review this vLLM benchmark. First perform
+read-only checks and list throughput, P50/P95 latency, peak memory, and
+correctness gates. Do not start a remote task without my authorization.
 ```
 
-插件可能在目标研究项目中创建 `.research/` 记录，但不会修改 Superpowers，
-也不会因为安装动作自动提交集群作业或使用付费资源。
+The plugin may create `.research/` records in a target research project. It
+does not modify Superpowers, submit cluster jobs, or consume paid resources as
+an automatic consequence of installation.
 
-### 3.8 安装故障速查
+### 3.8 Installation troubleshooting
 
-| 现象 | 最可能原因 | 处理方式 |
-|------|------------|----------|
-| `codex --version` 报 `ENOENT` | npm 包中的平台二进制缺失 | 重新安装官方 CLI：`npm install --global @openai/codex` |
-| 找不到个人 Marketplace | 文件名或用户目录错误 | 确认文件名是 `.agents/plugins/marketplace.json` |
-| Marketplace 可见但插件不可见 | `source.path` 错误或目录多套一层 | 确认 `~/plugins/research-engineering/.codex-plugin/plugin.json` 存在 |
-| Windows 辅助脚本拒绝安全写入 | 缺少所需 POSIX 文件原语 | 改在 WSL2 中运行，不要绕过安全检查 |
-| Claude Code 中没有插件 Skills | 启动时未传入插件根目录，或 Manifest/Skill 有错误 | 用 `claude --plugin-dir <插件目录>` 重启，再用 `/plugin` 查看 Errors |
-| 修改后行为未刷新 | 宿主仍在使用旧缓存 | 重新安装插件、重启宿主并创建新 task |
+| Symptom | Likely cause | Action |
+| --- | --- | --- |
+| `codex --version` returns `ENOENT` | A platform binary is missing from the npm package | Reinstall the official CLI: `npm install --global @openai/codex` |
+| Personal Marketplace is not found | Wrong filename or user directory | Check `.agents/plugins/marketplace.json` |
+| Marketplace is visible but the plugin is not | Incorrect `source.path` or an extra directory level | Check that `~/plugins/research-engineering/.codex-plugin/plugin.json` exists |
+| Windows helper script rejects a safe write | Required POSIX file primitives are unavailable | Use WSL2; do not bypass the safety check |
+| Claude Code cannot find Skills | The plugin root was not passed at startup, or the Manifest/Skill has an error | Restart with `claude --plugin-dir <plugin-directory>` and inspect `/plugin` errors |
+| Changes do not appear | The host is using an old cache | Reinstall, restart the host, and create a new task |
 
-排查顺序应为：CLI 能否启动 → Marketplace JSON 是否有效 → 插件 Manifest
-是否位于正确层级 → 插件是否安装 → 新 task 是否加载。不要直接修改 Codex
-缓存目录。
+Troubleshoot in this order: CLI launch → Marketplace JSON → Manifest depth →
+plugin installation → a new task. Do not edit Codex cache directories directly.
 
-## 4. 自动模式与用户覆盖
+## 4. Automatic modes and user overrides
 
-插件根据任务内容自动判定四种工作模式：
+The plugin classifies work into four modes:
 
-- **探索模式**：Notebook、原型、公式验证。最少上下文记录 + 静态检查 + 有界 Smoke Test；
-- **实验模式**：正式训练、消融、Benchmark。要求实验契约、基线、配置记录、科学审查；
-- **工程模式**：训练框架、分布式系统、推理服务、算子开发。要求隔离环境、实施计划、回归基线、工程审查；
-- **发布模式**：论文开源、公开模型。要求完整复现记录、兼容性、独立复现审查。
+- **Exploration:** notebooks, prototypes, and formula checks; minimal context,
+  static checks, and bounded smoke tests.
+- **Experiment:** formal training, ablations, and benchmarks; an experiment
+  contract, baseline, configuration record, and scientific review.
+- **Engineering:** training frameworks, distributed systems, inference serving,
+  and kernel development; isolation, an implementation plan, regression
+  baseline, and engineering review.
+- **Release:** paper code or public models; complete reproduction records,
+  compatibility, and independent reproducibility review.
 
-Agent 在开始工作前会声明判定、原因和将启用的规则。用户可以手动指定模式、Profile、验证深度或流程例外，用户指令始终覆盖自动判断。
+Before work, the Agent states its classification, reason, and enabled rules.
+User instructions always override automatic classification: the user can choose
+a mode, Profiles, validation depth, or workflow exception. An explicit user
+instruction cannot waive platform safety boundaries; paid, shared-cluster, or
+other high-cost work still needs an approved budget or explicit authorization.
 
-决策优先级为：当前任务中的明确用户指令 → `AGENTS.md` 等项目规则 →
-插件自动分类与成本/风险判断 → Skill 默认行为。用户覆盖优先于插件自动
-分类，但不能取消平台安全边界；涉及付费、共享集群或其他高成本资源时，
-仍需符合已声明预算或取得明确授权。
+The priority order is: explicit instructions in the current task → repository
+rules such as `AGENTS.md` → automatic mode and risk classification → Skill
+defaults.
 
-## 5. 三个 Profile
+## 5. Composable Profiles
 
-Profile 是可按需组合加载的领域 Skill：
+Profiles are domain Skills that can be loaded together when relevant.
 
-### ML Profile（`applying-ml-research-profile`）
+### ML Profile (`applying-ml-research-profile`)
 
-覆盖 PyTorch 模型与传统深度学习实验：
+For PyTorch models and conventional deep-learning experiments:
 
-- 数据划分、泄漏检查、采样与类别映射
-- 张量形状、dtype、device 和广播
-- 损失函数、指标与标签语义
-- 梯度流、冻结策略和优化器参数组
-- 随机种子、消融与统计稳定性
-- 校准、类别不平衡和分布漂移
+- data splits, leakage, sampling, and class mapping;
+- tensor shape, dtype, device, and broadcasting;
+- losses, metrics, and label semantics;
+- gradient flow, freezing strategy, and optimizer parameter groups;
+- seeds, ablations, and statistical stability;
+- calibration, class imbalance, and distribution shift.
 
-### LLM Profile（`applying-llm-research-profile`）
+### LLM Profile (`applying-llm-research-profile`)
 
-覆盖 Hugging Face、Accelerate、DeepSpeed/FSDP、PEFT/TRL、vLLM：
+For Hugging Face, Accelerate, DeepSpeed/FSDP, PEFT/TRL, and vLLM:
 
-- Tokenizer、特殊 Token 和模板正确性
-- 数据混合、截断、Packing 和 Label Mask
-- 训练与评测数据污染检测
-- 生成采样参数和评测可复现性
-- PEFT、Checkpoint、权重合并和恢复兼容性
-- 长上下文、KV Cache、量化与并行配置
+- tokenizer, special-token, and template correctness;
+- data mixing, truncation, packing, and label masks;
+- training/evaluation contamination;
+- generation parameters and evaluation reproducibility;
+- PEFT, checkpoints, weight merging, and resume compatibility;
+- long context, KV cache, quantization, and parallel settings.
 
-### AI Infra Profile（`applying-ai-infra-profile`）
+### AI Infra Profile (`applying-ai-infra-profile`)
 
-覆盖分布式训练、推理服务和 GPU 基础设施：
+For distributed training, serving, and GPU infrastructure:
 
-- 正确性优先于性能（数值一致性检查）
-- GPU/节点拓扑与通信后端
-- Warm-up、同步点、测量窗口和重复次数
-- 吞吐、延迟分布、峰值显存、利用率和成本
-- 数值一致性与精度权衡
-- 故障恢复、抢占、Checkpoint 和作业重启
+- correctness before performance, including numerical-equivalence checks;
+- GPU/node topology and communication backend;
+- warm-up, synchronization, measurement windows, and repetitions;
+- throughput, latency distributions, peak memory, utilization, and cost;
+- precision tradeoffs and numerical consistency;
+- recovery, preemption, checkpoints, and job restarts.
 
-## 6. 本地、SSH、Slurm 与云端 GPU
+## 6. Local, SSH, Slurm, and cloud GPU work
 
-插件支持四种执行环境和一种混合流程：
+The plugin supports local workstations, SSH remotes, Slurm clusters, cloud GPUs
+treated as SSH remotes, and a hybrid path of local design/review → remote
+execution → evidence collection.
 
-- **本地工作站**：直接执行，适合快速原型和小规模 Smoke Test；
-- **SSH 远端**：通过用户已有的 SSH Host Alias 操作远端 GPU 工作站；
-- **Slurm 集群**：通过 SSH 登录入口节点后提交和管理作业；
-- **云端 GPU**：视为 SSH 远端环境，插件不创建、销毁或扩缩容云资源。
-- **混合流程**：本地设计审查 → 远端执行 → 取回证据。
+Use only an existing SSH host alias. Before connecting, confirm the alias, the
+exact remote repository path, its synchronization mechanism, and permitted
+actions. The plugin does not create keys, read private keys, or silently modify
+SSH configuration. After a disconnect, query the remote process or Slurm state
+before declaring a job failed.
 
-SSH 连接只使用用户已经配置的 Host Alias。连接前应确认 Alias、精确远端
-仓库路径、代码同步方式和允许的操作，例如用户明确要求后才使用
-`ssh gpu-lab`；不会创建密钥、读取私钥或静默修改 SSH 配置。精确 Alias 与
-远端路径可写入 `.research/local/connections.json`，该目录默认忽略。SSH
-断开后先重新查询远端进程或 Slurm 状态，不把连接中断直接判为作业失败。
+## 7. The `.research/` directory
 
-## 7. .research/ 目录
-
-插件在项目根目录按需创建轻量元数据目录：
+The plugin can create lightweight project metadata on demand:
 
 ```text
 .research/
-├── .gitignore          # 排除 local/
-├── context.md          # 项目目标、Profile、环境、预算
-├── experiments/        # 实验契约（假设、基线、变量、指标、判据）
-├── runs/               # 运行记录（Git 提交、环境指纹、退出状态）
-├── reviews/            # 审查报告（科学/工程/复现审查）
-├── local/              # 本地连接细节（默认被 .gitignore 排除）
-└── progress.md         # 进度账本（长任务恢复不依赖聊天记忆）
+├── .gitignore          # excludes local/
+├── context.md          # goals, Profiles, environment, and budget
+├── experiments/        # contracts: hypotheses, baselines, variables, metrics, rules
+├── runs/               # Git revisions, environment fingerprints, and exit state
+├── reviews/            # scientific, engineering, and reproducibility reviews
+├── local/              # local connection details; ignored by default
+└── progress.md         # resumable progress ledger
 ```
 
-- `context.md` 记录模式、Profile、environment_id、预算等全局约束；
-- 实验契约定量定义假设、变量、指标和结论判据；
-- 运行记录包含本地和远端 Git 提交、Python/PyTorch/CUDA/GPU/NCCL 版本、退出状态和失败分类；
-- `local/` 保存 SSH Host Alias 和远端路径，不在版本控制中共享；
-- 其余轻量元数据可进入版本控制。
+`context.md` records global constraints. Experiment contracts define hypotheses,
+variables, metrics, and decision rules quantitatively. Run records identify the
+local/remote revision, relevant runtime versions, exit state, and failure class.
+Keep SSH aliases and remote paths in ignored `local/`; lightweight, shareable
+metadata can be version-controlled.
 
-## 8. 成本与授权
+## 8. Cost and authorization
 
-Agent 可自主执行：
+The Agent may run static checks, unit tests, and CPU validation. It may also run
+a bounded local or single-GPU smoke test within an existing budget.
 
-- 静态检查、单元测试、CPU 验证
-- 已有预算范围内、时间有上限的本地或单卡 Smoke Test
+Without a preset budget, the default is no paid resources, no scheduler
+submission, no large asset downloads, and an expected completion within ten
+minutes on the currently available CPU or GPU.
 
-未预设预算时的默认上限：不产生付费资源、不提交调度器作业、不下载大型资产，且预计能在当前可用 GPU 或 CPU 上于 10 分钟内完成。
+Explicit authorization is required for large model or dataset downloads,
+long-running training, multi-GPU or multi-node work, Slurm submission, paid
+cloud resources, and benchmarks that can materially consume shared resources.
+When a user provides time, GPU, node, or cost limits, tasks inside that budget
+can proceed; stop starting new work once the budget is reached and report the
+missing evidence.
 
-**需要用户授权**的操作：
+## 9. Multi-Agent work
 
-- 下载大型数据集或模型
-- 长时间训练、多 GPU/多节点任务
-- 提交 Slurm 作业
-- 使用付费云资源
-- 可能显著占用共享资源的 Benchmark
+Roles are selected by mode and risk:
 
-用户可预设时间、GPU、节点或费用预算。预算内无需逐次确认；达到预算后停止新任务，保存状态并报告尚缺证据。
+| Mode | Roles |
+| --- | --- |
+| Exploration | One Agent |
+| Experiment | Implementer + Scientific Reviewer |
+| Engineering | Implementer + Engineering Reviewer |
+| Engineering with algorithm semantics | Add Scientific Reviewer |
+| Release | Add Reproducibility Reviewer |
 
-## 9. 多 Agent
+Writes in a shared checkout are serial by default; independent read-only
+investigations may run in parallel. If native multi-agent work is unavailable,
+honor a user's explicit request to stop or to use a fallback. When no fallback
+preference is specified, use a staged single-Agent self-review and disclose the
+reduced review independence. Reviewers make independent judgments; an
+Implementer's report is not proof.
 
-根据模式和风险自动分配角色：
+## 10. Five helper scripts
 
-| 模式 | 角色 |
-|------|------|
-| 探索 | 单 Agent |
-| 实验 | Implementer + Scientific Reviewer |
-| 工程 | Implementer + Engineering Reviewer |
-| 工程（涉及算法语义） | + Scientific Reviewer |
-| 发布 | + Reproducibility Reviewer |
+All helper scripts prioritize the Python standard library and are stateless,
+testable, and idempotent.
 
-- 共享工作区的写任务默认串行；独立只读调查可并行；
-- 原生 Multi-Agent 不可用时先遵守用户显式要求停止或采用安全降级的指令；
-  用户未指定降级偏好时才退化为单 Agent 分阶段自检，并明确审查独立性降低；
-- Reviewer 必须独立判断，不能把 Implementer 自述视为证明。
+| Script | Purpose |
+| --- | --- |
+| `init_research_state.py` | Initializes `.research/` and templates without overwriting existing files |
+| `capture_environment.py` | Captures local or SSH Git, Python, PyTorch, CUDA, and GPU summaries as structured JSON |
+| `record_run.py` | Creates or updates a run record, validates required fields, and preserves unknown fields |
+| `inspect_slurm_job.py` | Parses `squeue`/`sacct` output and records job status, exit cause, and resource use |
+| `summarize_evidence.py` | Summarizes code validation, run status, research conclusions, missing evidence, and residual risk |
 
-## 10. 五个辅助脚本
+## 11. End-to-end example
 
-所有脚本使用 Python 标准库优先，保持无状态、可测试、幂等。
+The following quick start uses the **synthetic example** in
+`examples/minimal-project/`. It demonstrates record formats and evidence
+boundaries. It does not mean this repository has run training.
 
-| 脚本 | 功能 |
-|------|------|
-| `init_research_state.py` | 初始化 `.research/` 目录和模板，不覆盖已有文件 |
-| `capture_environment.py` | 采集本地或 SSH 远端的 Git、Python、PyTorch、CUDA、GPU 等环境摘要，输出结构化 JSON |
-| `record_run.py` | 创建或更新运行记录，校验必需字段，保留已有未知字段 |
-| `inspect_slurm_job.py` | 解析 `squeue`/`sacct` 输出，记录 Job 状态、退出原因和资源使用 |
-| `summarize_evidence.py` | 汇总代码验证、运行状态、研究结论、缺失证据和剩余风险 |
+**1. Make an experiment request**
 
-## 11. 完整示例
+> On a local CPU, implement and validate a confidence gate. First run a smoke
+> test of no more than 20 steps, not full training. The goal is to reduce false
+> positives without a material recall regression.
 
-以下 quick start 使用 `examples/minimal-project/` 中的**合成示例**，用于展示
-记录格式和证据边界；它不表示本仓库真的执行过训练。
-
-**1. 发出实验请求**
-
-> 请在本地 CPU 上实现并验证一个置信度门控。先做不超过 20 步的 Smoke
-> Test，不运行完整训练；目标是减少误报，同时避免召回率明显下降。
-
-**2. Router 先显式声明自动判定**
+**2. The router states its classification first**
 
 ```text
 - Mode: experiment
@@ -574,27 +554,28 @@ Agent 可自主执行：
 - Next Skill: framing-research-work→designing-research-experiments
 ```
 
-这只是路由声明，不代表插件已经安装，也不会自动开始运行。用户可以在执行
-前覆盖模式、Profile 或验证深度。
+This is only a routing statement. It does not prove that the plugin is
+installed or start a run. The user may override the mode, Profiles, or
+validation depth before execution.
 
-**3. 初始化轻量研究状态**
+**3. Initialize lightweight research state**
 
 ```bash
 python3 /path/to/research-engineering/scripts/init_research_state.py --root .
 ```
 
-初始化器只创建缺失的 `.research/` 目录与模板，不覆盖已有文件。随后在
-`experiments/demo.md` 中记录 `demo-confidence-gate` 的假设、基线、数据
-划分、指标和成功/失败/不确定判据。
+The initializer creates only missing `.research/` files and templates. Record
+the hypothesis, baseline, split, metrics, and success/failure/inconclusive
+rules in `experiments/demo.md`.
 
-**4. 经确认后运行并记录本地 Smoke Test**
+**4. Run and record an authorized local smoke test**
 
 ```bash
 python train.py --config configs/demo.yaml --max-steps 20 --seed 7
 ```
 
-对应的合成计划记录位于 `.research/runs/demo-smoke.json`。它只展示待运行命令
-和记录格式，不是一次已完成执行；核心字段为：
+The synthetic plan at `.research/runs/demo-smoke.json` demonstrates the
+command and record format. It is not an executed run:
 
 ```json
 {
@@ -608,61 +589,59 @@ python train.py --config configs/demo.yaml --max-steps 20 --seed 7
 }
 ```
 
-Scientific Reviewer 可把设计审查写入
-`.research/reviews/demo-scientific.md`。`PASS` 只表示该审查未发现阻塞项，
-不能把单种子 Smoke Test 提升为研究结论。
+A Scientific Reviewer may write a design review to
+`.research/reviews/demo-scientific.md`. `PASS` means only that the review found
+no blocking design issue; it cannot elevate a one-seed smoke test into a
+scientific conclusion.
 
-**5. 输出最终三态证据报告**
+**5. Report the three evidence states**
 
 ```text
-Code verification: not_verified — 尚未执行确定性、回归或 Smoke 验证。
-Experiment execution: not_verified — 正式多种子实验与阈值扫描尚未执行。
-Conclusion support: not_verified — 尚无效应量、统计比较或基线证据。
+Code verification: not_verified — no deterministic, regression, or smoke validation has run.
+Experiment execution: not_verified — formal multi-seed experiments and threshold sweeps have not run.
+Conclusion support: not_verified — no effect size, statistical comparison, or baseline evidence is available.
 ```
 
-下一步应执行预先定义的完整实验与统计比较；在此之前不得声称置信度门控
-改善了模型质量。
+Run the predefined full experiment and statistical comparison before claiming
+that the confidence gate improves model quality.
 
-## 12. 安全与隐私
+## 12. Security and privacy
 
-- 不读取、保存或复制 SSH 私钥；
-- 不在命令、日志或 `.research/` 中写入密码、Token 或 API Key；
-- 不静默修改 SSH 配置或系统文件；
-- `.research/local/` 默认被 `.gitignore` 排除，不会进入版本控制；
-- 可共享的运行记录使用用户定义的 `environment_id`，不写入精确主机名或绝对路径（除非用户明确要求）。
+- Do not read, save, or copy SSH private keys.
+- Do not put passwords, tokens, or API keys in commands, logs, or `.research/`.
+- Do not silently modify SSH configuration or system files.
+- `.research/local/` is ignored by default.
+- Shareable run records use a user-defined `environment_id`, not an exact host
+  name or absolute path, unless the user explicitly requests it.
 
-## 13. 测试
+## 13. Tests
 
 ```bash
-# 运行所有测试
+# Run all tests
 python3 -m unittest discover -s tests -v
 
-# 运行插件结构验证
+# Run plugin-structure validation when the validator is available
 python3 /path/to/validate_plugin.py .
 ```
 
-最近一次公开发布准备在 macOS 上运行了 **127 个离线自动化测试**。这里的
-“127 项”是 `unittest` 收集到的测试用例数，不是 127 次 GPU 训练或 127 个
-真实研究实验。它们覆盖：
+The latest public release-preparation run executed **127 offline automated
+tests** on macOS. “127 tests” means `unittest` cases, not 127 GPU trainings or
+127 real research experiments. They cover plugin Manifests, marketplace
+documentation, the 11 Skills, five helper scripts, fixed Slurm fixtures,
+synthetic `.research/` contracts, evidence-layer separation, and behavior
+evidence.
 
-- 插件 Manifest、Marketplace 安装文档和目录结构契约；
-- 11 个 Skills 的 Frontmatter、名称、路由和必需语义；
-- 五个辅助脚本的正常输入、非法输入、幂等性和安全边界；
-- Slurm 输出解析，但使用的是固定样例，不连接真实集群；
-- 最小示例的 `.research/` 结构、实验契约和本地连接排除；
-- Smoke、代码验证、实验执行和科学结论三者必须分离；
-- 行为评估固件中的 baseline/skilled 证据和预期差异。
+Thus, `127/127` means the offline contract passed at that time. It does not
+establish real GPU, SSH, Slurm, cloud GPU, or Marketplace success, nor any
+model-quality, throughput, or scientific-superiority claim. Record acceptance
+results separately for Linux, Windows/WSL2, and real infrastructure.
 
-因此，`127/127` 只说明这套离线契约在当时全部通过。它不等于真实 GPU、
-SSH、Slurm、云 GPU 或 Marketplace 安装已经成功，也不支持任何模型效果、
-吞吐提升或科学优越性结论。Linux、Windows/WSL2 和真实基础设施仍应分别
-记录验收结果。
+## 14. Update and uninstall
 
-## 14. 更新与卸载
+To update, back up and read the new instructions before updating the personal
+plugin directory.
 
-**更新**：先备份并阅读新版说明，再更新个人插件目录。
-
-macOS、Linux 或 WSL：
+macOS, Linux, or WSL:
 
 ```bash
 cd ~/plugins/research-engineering
@@ -670,7 +649,7 @@ git pull --ff-only
 codex plugin add research-engineering@personal
 ```
 
-Windows PowerShell：
+Windows PowerShell:
 
 ```powershell
 Set-Location "$env:USERPROFILE\plugins\research-engineering"
@@ -678,41 +657,48 @@ git pull --ff-only
 codex plugin add research-engineering@personal
 ```
 
-正式发布必须更新 `.codex-plugin/plugin.json` 的语义化版本。开发者若需要在
-不改正式版本号的情况下刷新本地缓存，可以使用 `plugin-creator` 提供的
-`update_plugin_cachebuster.py`；公开 Release 不应使用本地 cachebuster 版本。
+For a formal release, update the semantic version in
+`.codex-plugin/plugin.json`. Developers may use `plugin-creator`'s local
+cachebuster to refresh development caches without changing the release version;
+do not use a local cachebuster version for a public release. Reopen the host and
+create a new task after updating. The plugin never migrates a research project's
+`.research/` automatically.
 
-更新后请重新打开宿主并新建一个新 task。插件不会自行更新或迁移研究项目中
-的 `.research/`；跨版本使用前应检查格式变化。
+For a Claude Code `--plugin-dir` session, run `/reload-plugins` after updating
+the source, or restart the session with the same command.
 
-Claude Code 使用 `--plugin-dir` 的用户更新源码后，可在现有 Claude Code 会话
-运行 `/reload-plugins`；若仍未刷新，退出会话并按第 3.6 节重新启动。
-
-**卸载**：
+To uninstall:
 
 ```bash
 codex plugin remove research-engineering@personal
 ```
 
-卸载后可以自行决定是否保留插件源码和个人 Marketplace 条目。不要删除整个
-个人 Marketplace 文件，因为其中可能还有其他插件。卸载插件不会删除研究
-项目中的 `.research/`；只有确认研究记录不再需要时才应单独处理它。
+Uninstalling the plugin does not delete a research project's `.research/`.
+Keep or remove source and the personal Marketplace entry deliberately; do not
+delete the entire personal Marketplace file because it may contain other
+plugins.
 
-## 15. 公开发布检查
+## 15. Public-release checklist
 
-发布源码或 Release 前至少检查：
+Before a source or release publication, check that:
 
-- 工作树中没有 `.env`、凭据、主机名、个人绝对路径或本地连接配置；
-- `.research/local/`、ZIP、`dist/`、`tmp/` 和操作系统临时文件未进入提交；
-- `.codex-plugin/plugin.json` 的版本、作者显示名、许可证和描述适合公开；
-- `.claude-plugin/plugin.json` 与 Codex Manifest 的名称、版本和许可证一致；
-- `python3 -m unittest discover -s tests -v` 与插件验证器通过；
-- `git archive` 生成的 ZIP 不包含内部计划、私有报告或 Git 元数据；
-- 发布说明明确区分离线测试、真实环境执行和科学结论证据。
+- the worktree contains no `.env`, credentials, host names, personal absolute
+  paths, or local connection configuration;
+- `.research/local/`, ZIPs, `dist/`, `tmp/`, and operating-system temporary
+  files are not staged;
+- the Codex Manifest version, author display name, license, and description are
+  safe for public use;
+- the Claude Code Manifest agrees with the Codex Manifest on name, version, and
+  license;
+- the unit suite and plugin validator pass;
+- a `git archive` ZIP excludes private reports, internal plans, and Git
+  metadata; and
+- release notes distinguish offline tests, real-environment runs, and evidence
+  for scientific conclusions.
 
-首次发布前还应把 README 中的 `OWNER/REPOSITORY` 替换为真实公开仓库地址。
-
-删除当前版本中的敏感文件不会自动清除旧提交。公开完整 Git 历史前，应使用
-`git log --all --format='%h %an <%ae>'` 审查作者身份，并检查历史提交是否包含
-敏感路径或凭据。如果历史不适合公开，优先从已审计的源码树创建干净的公开
-仓库或经过确认的压缩历史；不要在未备份时直接重写并强制推送现有历史。
+Before the first public release, replace `OWNER/REPOSITORY` in installation
+examples with the actual public repository. Removing a sensitive file from the
+current tree does not remove it from earlier commits. Audit history before
+publishing a complete history; if it is unsuitable, create a clean public
+repository from an audited source tree or use a deliberately approved rewritten
+history. Do not force-push without an explicit instruction and a backup.
