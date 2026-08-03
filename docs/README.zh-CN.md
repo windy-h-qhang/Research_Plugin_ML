@@ -37,6 +37,7 @@ code .
 | `examples/minimal-project/` | 合成的最小使用示例，不代表真实研究结果 |
 | `tests/` | Manifest、Skills、脚本、集成和行为测试 |
 | `docs/real-environment-validation.zh-CN.md` | 真实 GPU、SSH、Slurm、云 GPU 和 Marketplace 的验收边界 |
+| `docs/repository-maturity-roadmap.md` | 仓库成熟度后续完善计划（英文） |
 
 无需安装依赖即可运行离线测试：
 

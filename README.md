@@ -40,6 +40,7 @@ Start with these files:
 | `examples/minimal-project/` | A synthetic minimal example, not real research results |
 | `tests/` | Manifest, Skill, script, integration, and behavior tests |
 | `docs/real-environment-validation.md` | Boundaries for real GPU, SSH, Slurm, cloud GPU, and Marketplace validation |
+| `docs/repository-maturity-roadmap.md` | Planned improvements for CI, collaboration, discoverability, and release governance |
 
 Run the offline suite without installing dependencies:
 
