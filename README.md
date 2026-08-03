@@ -64,25 +64,9 @@ It does not provide deep, framework-specific JAX or TensorFlow support in this
 release; it does not create cloud resources, manage SSH credentials, or manage
 large datasets automatically.
 
-## 2. Relationship to Superpowers
+## 2. Platforms, validation, packaging, and installation
 
-| Dimension | Superpowers | Research Engineering |
-| --- | --- | --- |
-| Primary focus | General software-engineering workflow and discipline | Research code, experiment execution, and research evidence |
-| Validation | Test-first and completion validation for features and defects | Deterministic, invariant, smoke, regression, or statistical validation selected by evidence level |
-| Planning unit | Quickly executable, individually verifiable steps | Independently reviewable research or engineering units |
-| Review roles | General implementation, specification, and code-quality review | Implementer plus Scientific, Engineering, or Reproducibility Reviewer |
-| Domain rules | General engineering tasks | Composable ML, LLM, and AI Infra Profiles |
-| Research execution | Not defined by this plugin | Local, SSH, Slurm, cloud GPU, `.research/`, and cost gates |
-
-The plugins are independent and can coexist. Research Engineering never
-modifies, replaces, or depends on Superpowers, and it avoids Skill-name
-conflicts. The comparison describes different emphases; it does not imply that
-Superpowers cannot be used for research or remote work.
-
-## 3. Platforms, validation, packaging, and installation
-
-### 3.1 Platform boundaries
+### 2.1 Platform boundaries
 
 | Platform | Recommended route | Current boundary |
 | --- | --- | --- |
@@ -96,7 +80,7 @@ Native Windows is fine for reading Skills and editing Markdown. Use WSL2 for
 Skill is not evidence that every helper script has been validated on that
 platform.
 
-### 3.2 Requirements and offline validation
+### 2.2 Requirements and offline validation
 
 - Git for cloning, status checks, and reproducible archives.
 - Python 3; helper scripts use the standard library and tests use `unittest`.
@@ -140,7 +124,7 @@ public Marketplace installation, and does not establish that a research method
 outperforms a baseline. See `docs/real-environment-validation.md` for the
 complete boundary.
 
-### 3.3 Create a release ZIP
+### 2.3 Create a release ZIP
 
 `git archive` includes only files committed to `HEAD`. Review and commit the
 intended release first; place the resulting ZIP in ignored `dist/` and never
@@ -177,7 +161,7 @@ Get-FileHash dist/research-engineering-0.1.0.zip -Algorithm SHA256
 The ZIP is a source-distribution artifact, not a double-click installer. Do
 not extract it into a Codex runtime-cache directory.
 
-### 3.4 Install in Codex through a personal Marketplace
+### 2.4 Install in Codex through a personal Marketplace
 
 For public users, place the source in a personal plugin directory and add a
 personal Marketplace entry. Replace `OWNER/REPOSITORY` with the actual public
@@ -287,7 +271,7 @@ directory; configuring only WSL's `~/.agents/plugins/marketplace.json` will not
 normally make the plugin appear in the Windows desktop app. WSL is better for
 the project's Python, SSH, and Slurm workflows.
 
-### 3.5 Team or repository Marketplace
+### 2.5 Team or repository Marketplace
 
 Maintainers can create a separate Marketplace root:
 
@@ -313,7 +297,7 @@ In Windows PowerShell, replace `/path/to/marketplace-root` with a real Windows
 path. `source.path` is relative to the Marketplace root and must remain
 `./plugins/research-engineering`.
 
-### 3.6 Load in Claude Code
+### 2.6 Load in Claude Code
 
 Codex is the primary host, but this repository also provides
 `.claude-plugin/plugin.json`. Claude Code reads Skills from `skills/`. The
@@ -352,7 +336,7 @@ In Claude Code, use `/help` to find the `research-engineering` namespace; try
 Marketplace installation, upgrades, and public release have a separate
 distribution process and are not end-to-end validated here.
 
-### 3.7 Use after installation
+### 2.7 Use after installation
 
 Use natural-language tasks; no Python import is needed. State the goal, mode,
 Profiles, execution environment, and budget explicitly. For example:
@@ -371,10 +355,10 @@ correctness gates. Do not start a remote task without my authorization.
 ```
 
 The plugin may create `.research/` records in a target research project. It
-does not modify Superpowers, submit cluster jobs, or consume paid resources as
-an automatic consequence of installation.
+does not submit cluster jobs or consume paid resources as an automatic
+consequence of installation.
 
-### 3.8 Installation troubleshooting
+### 2.8 Installation troubleshooting
 
 | Symptom | Likely cause | Action |
 | --- | --- | --- |
@@ -388,7 +372,7 @@ an automatic consequence of installation.
 Troubleshoot in this order: CLI launch → Marketplace JSON → Manifest depth →
 plugin installation → a new task. Do not edit Codex cache directories directly.
 
-## 4. Automatic modes and user overrides
+## 3. Automatic modes and user overrides
 
 The plugin classifies work into four modes:
 
@@ -412,7 +396,7 @@ The priority order is: explicit instructions in the current task → repository
 rules such as `AGENTS.md` → automatic mode and risk classification → Skill
 defaults.
 
-## 5. Composable Profiles
+## 4. Composable Profiles
 
 Profiles are domain Skills that can be loaded together when relevant.
 
@@ -449,7 +433,7 @@ For distributed training, serving, and GPU infrastructure:
 - precision tradeoffs and numerical consistency;
 - recovery, preemption, checkpoints, and job restarts.
 
-## 6. Local, SSH, Slurm, and cloud GPU work
+## 5. Local, SSH, Slurm, and cloud GPU work
 
 The plugin supports local workstations, SSH remotes, Slurm clusters, cloud GPUs
 treated as SSH remotes, and a hybrid path of local design/review → remote
@@ -461,7 +445,7 @@ actions. The plugin does not create keys, read private keys, or silently modify
 SSH configuration. After a disconnect, query the remote process or Slurm state
 before declaring a job failed.
 
-## 7. The `.research/` directory
+## 6. The `.research/` directory
 
 The plugin can create lightweight project metadata on demand:
 
@@ -482,7 +466,7 @@ local/remote revision, relevant runtime versions, exit state, and failure class.
 Keep SSH aliases and remote paths in ignored `local/`; lightweight, shareable
 metadata can be version-controlled.
 
-## 8. Cost and authorization
+## 7. Cost and authorization
 
 The Agent may run static checks, unit tests, and CPU validation. It may also run
 a bounded local or single-GPU smoke test within an existing budget.
@@ -498,7 +482,7 @@ When a user provides time, GPU, node, or cost limits, tasks inside that budget
 can proceed; stop starting new work once the budget is reached and report the
 missing evidence.
 
-## 9. Multi-Agent work
+## 8. Multi-Agent work
 
 Roles are selected by mode and risk:
 
@@ -517,7 +501,7 @@ preference is specified, use a staged single-Agent self-review and disclose the
 reduced review independence. Reviewers make independent judgments; an
 Implementer's report is not proof.
 
-## 10. Five helper scripts
+## 9. Five helper scripts
 
 All helper scripts prioritize the Python standard library and are stateless,
 testable, and idempotent.
@@ -530,7 +514,7 @@ testable, and idempotent.
 | `inspect_slurm_job.py` | Parses `squeue`/`sacct` output and records job status, exit cause, and resource use |
 | `summarize_evidence.py` | Summarizes code validation, run status, research conclusions, missing evidence, and residual risk |
 
-## 11. End-to-end example
+## 10. End-to-end example
 
 The following quick start uses the **synthetic example** in
 `examples/minimal-project/`. It demonstrates record formats and evidence
@@ -606,7 +590,7 @@ Conclusion support: not_verified — no effect size, statistical comparison, or 
 Run the predefined full experiment and statistical comparison before claiming
 that the confidence gate improves model quality.
 
-## 12. Security and privacy
+## 11. Security and privacy
 
 - Do not read, save, or copy SSH private keys.
 - Do not put passwords, tokens, or API keys in commands, logs, or `.research/`.
@@ -615,7 +599,7 @@ that the confidence gate improves model quality.
 - Shareable run records use a user-defined `environment_id`, not an exact host
   name or absolute path, unless the user explicitly requests it.
 
-## 13. Tests
+## 12. Tests
 
 ```bash
 # Run all tests
@@ -637,7 +621,7 @@ establish real GPU, SSH, Slurm, cloud GPU, or Marketplace success, nor any
 model-quality, throughput, or scientific-superiority claim. Record acceptance
 results separately for Linux, Windows/WSL2, and real infrastructure.
 
-## 14. Update and uninstall
+## 13. Update and uninstall
 
 To update, back up and read the new instructions before updating the personal
 plugin directory.
@@ -679,7 +663,7 @@ Keep or remove source and the personal Marketplace entry deliberately; do not
 delete the entire personal Marketplace file because it may contain other
 plugins.
 
-## 15. Public-release checklist
+## 14. Public-release checklist
 
 Before a source or release publication, check that:
 

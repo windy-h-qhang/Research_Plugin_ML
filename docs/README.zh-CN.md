@@ -56,24 +56,9 @@ python3 -m unittest discover -s tests -v
 
 **不适用**于：JAX/TensorFlow 深度专属支持（首版以 PyTorch 为第一等公民）、自动创建云资源、管理 SSH 凭据或大型数据集。
 
-## 2. 与 Superpowers 的区别
+## 2. 平台、验证、打包与安装
 
-| 维度 | Superpowers | Research Engineering |
-|------|-------------|----------------------|
-| 主要定位 | 通用软件工程工作流与开发纪律 | 研究代码、实验执行与研究证据 |
-| 验证重点 | 对功能与缺陷修复强调测试先行和完成前验证 | 按证据层选择确定性测试、不变量、Smoke、回归或统计验证 |
-| 计划粒度 | 偏向可快速执行、可逐项验证的实现步骤 | 按可独立审查的研究或工程单元拆分，不强制固定分钟数 |
-| 审查角色 | 通用实现、规格与代码质量审查 | Implementer + Scientific/Engineering/Reproducibility Reviewer |
-| 领域规则 | 可用于通用工程任务 | 三个可组合 Profile：ML、LLM、AI Infra |
-| 研究运行约定 | 不作为本插件文档的声明对象 | 明确定义本地、SSH、Slurm、云端 GPU、`.research/` 与成本门禁 |
-
-两套插件相互独立，Skill 名称无冲突，可以同时使用。Research Engineering
-不会修改、覆盖或依赖 Superpowers；上表只说明两者的主要关注点，不表示
-Superpowers 不能处理远端、研究或成本相关任务。
-
-## 3. 平台、验证、打包与安装
-
-### 3.1 平台支持边界
+### 2.1 平台支持边界
 
 | 平台 | 建议方式 | 当前边界 |
 |------|----------|----------|
@@ -87,7 +72,7 @@ Windows 用户若只阅读 Skills 或编辑 Markdown，可以使用原生 VS Cod
 WSL2 中使用本插件。不要把“能够加载 Skills”误报为“全部辅助脚本已在该平台
 验证通过”。
 
-### 3.2 环境要求与离线验证
+### 2.2 环境要求与离线验证
 
 - Git：克隆源码、检查版本状态和生成可复现归档；
 - Python 3：辅助脚本只依赖标准库，测试使用 `unittest`；
@@ -130,7 +115,7 @@ git diff --check
 端到端验收，也不证明某种研究方法优于基线。完整边界见
 `docs/real-environment-validation.zh-CN.md`。
 
-### 3.3 生成发布 ZIP
+### 2.3 生成发布 ZIP
 
 `git archive` 只包含已经提交到 `HEAD` 的文件。打包前应先审查并提交准备
 发布的改动；生成的 ZIP 放在已忽略的 `dist/`，不要提交回源码仓库。
@@ -177,7 +162,7 @@ Get-FileHash dist/research-engineering-0.1.0.zip -Algorithm SHA256
 ZIP 是源码分发产物，不是可双击安装的应用，也不应直接解压到 Codex 的运行时
 缓存目录。
 
-### 3.4 安装到 Codex：个人 Marketplace
+### 2.4 安装到 Codex：个人 Marketplace
 
 公开用户最简单的安装方式是把插件放在个人插件目录，并在个人 Marketplace
 中添加条目。下面的 `OWNER/REPOSITORY` 必须替换为真实公开仓库。
@@ -300,7 +285,7 @@ Windows 桌面应用读取的是 Windows 用户目录。仅在 WSL 的
 桌面应用中；要给桌面应用安装，请使用上面的 PowerShell 路径。WSL 更适合
 运行本项目的 Python、SSH 和 Slurm 工作流。
 
-### 3.5 团队或仓库 Marketplace
+### 2.5 团队或仓库 Marketplace
 
 团队维护者可以创建独立 Marketplace 根目录：
 
@@ -326,7 +311,7 @@ Windows PowerShell 可将 `/path/to/marketplace-root` 换成类似
 `C:\path\to\marketplace-root` 的真实路径。`source.path` 必须以 Marketplace
 根目录为基准，并使用 `./plugins/research-engineering`。
 
-### 3.6 在 Claude Code 中载入
+### 2.6 在 Claude Code 中载入
 
 本仓库以 Codex 为主要宿主，同时提供 `.claude-plugin/plugin.json` 兼容层。
 Claude Code 会从插件根目录的 `skills/` 读取 Skills。这里使用官方的
@@ -382,7 +367,7 @@ Claude 的长期 Marketplace 安装、升级和公开发布使用另一套 Marke
 与分发流程，本版本尚未完成该端到端验收。不要把本节的本地临时加载表述为
 “已经发布到 Claude Marketplace”。
 
-### 3.7 安装后如何使用
+### 2.7 安装后如何使用
 
 插件通过自然语言任务触发，不需要导入 Python 模块。建议明确目标、模式、
 Profile、执行环境和预算。例如：
@@ -398,10 +383,10 @@ PyTorch 分类实验。先建立 .research 上下文和实验契约，只运行 
 列出吞吐、P50/P95 延迟、峰值显存和正确性门槛；未经我授权不要启动远端任务。
 ```
 
-插件可能在目标研究项目中创建 `.research/` 记录，但不会修改 Superpowers，
-也不会因为安装动作自动提交集群作业或使用付费资源。
+插件可能在目标研究项目中创建 `.research/` 记录，但不会因为安装动作自动
+提交集群作业或使用付费资源。
 
-### 3.8 安装故障速查
+### 2.8 安装故障速查
 
 | 现象 | 最可能原因 | 处理方式 |
 |------|------------|----------|
@@ -416,7 +401,7 @@ PyTorch 分类实验。先建立 .research 上下文和实验契约，只运行 
 是否位于正确层级 → 插件是否安装 → 新 task 是否加载。不要直接修改 Codex
 缓存目录。
 
-## 4. 自动模式与用户覆盖
+## 3. 自动模式与用户覆盖
 
 插件根据任务内容自动判定四种工作模式：
 
@@ -432,7 +417,7 @@ Agent 在开始工作前会声明判定、原因和将启用的规则。用户�
 分类，但不能取消平台安全边界；涉及付费、共享集群或其他高成本资源时，
 仍需符合已声明预算或取得明确授权。
 
-## 5. 三个 Profile
+## 4. 三个 Profile
 
 Profile 是可按需组合加载的领域 Skill：
 
@@ -469,7 +454,7 @@ Profile 是可按需组合加载的领域 Skill：
 - 数值一致性与精度权衡
 - 故障恢复、抢占、Checkpoint 和作业重启
 
-## 6. 本地、SSH、Slurm 与云端 GPU
+## 5. 本地、SSH、Slurm 与云端 GPU
 
 插件支持四种执行环境和一种混合流程：
 
@@ -485,7 +470,7 @@ SSH 连接只使用用户已经配置的 Host Alias。连接前应确认 Alias�
 远端路径可写入 `.research/local/connections.json`，该目录默认忽略。SSH
 断开后先重新查询远端进程或 Slurm 状态，不把连接中断直接判为作业失败。
 
-## 7. .research/ 目录
+## 6. .research/ 目录
 
 插件在项目根目录按需创建轻量元数据目录：
 
@@ -506,7 +491,7 @@ SSH 连接只使用用户已经配置的 Host Alias。连接前应确认 Alias�
 - `local/` 保存 SSH Host Alias 和远端路径，不在版本控制中共享；
 - 其余轻量元数据可进入版本控制。
 
-## 8. 成本与授权
+## 7. 成本与授权
 
 Agent 可自主执行：
 
@@ -525,7 +510,7 @@ Agent 可自主执行：
 
 用户可预设时间、GPU、节点或费用预算。预算内无需逐次确认；达到预算后停止新任务，保存状态并报告尚缺证据。
 
-## 9. 多 Agent
+## 8. 多 Agent
 
 根据模式和风险自动分配角色：
 
@@ -542,7 +527,7 @@ Agent 可自主执行：
   用户未指定降级偏好时才退化为单 Agent 分阶段自检，并明确审查独立性降低；
 - Reviewer 必须独立判断，不能把 Implementer 自述视为证明。
 
-## 10. 五个辅助脚本
+## 9. 五个辅助脚本
 
 所有脚本使用 Python 标准库优先，保持无状态、可测试、幂等。
 
@@ -554,7 +539,7 @@ Agent 可自主执行：
 | `inspect_slurm_job.py` | 解析 `squeue`/`sacct` 输出，记录 Job 状态、退出原因和资源使用 |
 | `summarize_evidence.py` | 汇总代码验证、运行状态、研究结论、缺失证据和剩余风险 |
 
-## 11. 完整示例
+## 10. 完整示例
 
 以下 quick start 使用 `examples/minimal-project/` 中的**合成示例**，用于展示
 记录格式和证据边界；它不表示本仓库真的执行过训练。
@@ -626,7 +611,7 @@ Conclusion support: not_verified — 尚无效应量、统计比较或基线证�
 下一步应执行预先定义的完整实验与统计比较；在此之前不得声称置信度门控
 改善了模型质量。
 
-## 12. 安全与隐私
+## 11. 安全与隐私
 
 - 不读取、保存或复制 SSH 私钥；
 - 不在命令、日志或 `.research/` 中写入密码、Token 或 API Key；
@@ -634,7 +619,7 @@ Conclusion support: not_verified — 尚无效应量、统计比较或基线证�
 - `.research/local/` 默认被 `.gitignore` 排除，不会进入版本控制；
 - 可共享的运行记录使用用户定义的 `environment_id`，不写入精确主机名或绝对路径（除非用户明确要求）。
 
-## 13. 测试
+## 12. 测试
 
 ```bash
 # 运行所有测试
@@ -661,7 +646,7 @@ SSH、Slurm、云 GPU 或 Marketplace 安装已经成功，也不支持任何模
 吞吐提升或科学优越性结论。Linux、Windows/WSL2 和真实基础设施仍应分别
 记录验收结果。
 
-## 14. 更新与卸载
+## 13. 更新与卸载
 
 **更新**：先备份并阅读新版说明，再更新个人插件目录。
 
@@ -701,7 +686,7 @@ codex plugin remove research-engineering@personal
 个人 Marketplace 文件，因为其中可能还有其他插件。卸载插件不会删除研究
 项目中的 `.research/`；只有确认研究记录不再需要时才应单独处理它。
 
-## 15. 公开发布检查
+## 14. 公开发布检查
 
 发布源码或 Release 前至少检查：
 
