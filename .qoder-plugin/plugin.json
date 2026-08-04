@@ -1,0 +1,25 @@
+{
+  "name": "research-engineering",
+  "displayName": "Research Engineering",
+  "version": "0.1.0",
+  "description": "Evidence-driven research engineering workflows for PyTorch, LLM, and AI infrastructure projects.",
+  "descriptionZh": "面向 PyTorch、大模型与 AI 基础设施研究的证据驱动研究工程工作流插件。",
+  "author": {
+    "name": "Research Engineering Contributors"
+  },
+  "logo": "./assets/avatar.svg",
+  "keywords": [
+    "qoder-plugin",
+    "research",
+    "pytorch",
+    "machine-learning",
+    "llm",
+    "ai-infrastructure",
+    "slurm",
+    "reproducibility"
+  ],
+  "category": "developer-tools",
+  "tags": ["skill", "research", "machine-learning"],
+  "skills": "./skills/",
+  "preserveUpstreamMetadata": true
+}

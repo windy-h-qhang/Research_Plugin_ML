@@ -3,8 +3,8 @@
 > Language: English | [简体中文](docs/README.zh-CN.md)
 
 An independent Agent plugin for deep learning, large-language-model, and AI
-infrastructure research. Codex is the primary host and Claude Code is supported
-through a compatibility layer. The plugin combines specification-driven work,
+infrastructure research. Codex is the primary host; Claude Code and Qoder are
+supported through compatibility layers. The plugin combines specification-driven work,
 isolated debugging, independent review, and layered validation, adapting its
 workflow strength to the maturity of the research task. PyTorch is the
 first-class ecosystem in this initial release.
@@ -34,6 +34,7 @@ Start with these files:
 | --- | --- |
 | `.codex-plugin/plugin.json` | Codex plugin identity, version, and entry point |
 | `.claude-plugin/plugin.json` | Claude Code compatibility identity and description |
+| `.qoder-plugin/plugin.json` | Qoder compatibility identity used by the exported Qoder package |
 | `skills/*/SKILL.md` | Eight shared core Skills and three composable Profiles |
 | `scripts/` | Research-state initialization, environment capture, run records, and evidence summaries |
 | `templates/` | Research-context, experiment, run, and review templates |
@@ -336,7 +337,33 @@ In Claude Code, use `/help` to find the `research-engineering` namespace; try
 Marketplace installation, upgrades, and public release have a separate
 distribution process and are not end-to-end validated here.
 
-### 2.7 Use after installation
+### 2.7 Install in Qoder
+
+Qoder reads `.qoder-plugin/plugin.json` and loads Skills from `skills/`. A
+Qoder package must not contain `.codex-plugin`, and its directory name must
+match the manifest `name`, so export the Qoder-native package first instead of
+installing the repository root directly:
+
+```bash
+python3 scripts/export_qoder_plugin.py --zip
+```
+
+This stages `dist/research-engineering/` and builds
+`dist/research-engineering-0.1.0.zip`; both pass the offline structure
+validator. Then install with `qodercli`:
+
+```bash
+qodercli plugin install "$(pwd)/dist/research-engineering"
+qodercli plugin list
+qodercli skills list
+```
+
+In the Qoder IDE, install from local through the Plugins panel and select
+`dist/research-engineering/`. After installation, the eleven Skills are
+available by name, for example `using-research-workflows`. Qoder ignores the
+Codex-specific `skills/*/agents/openai.yaml` files; no Skill edits are needed.
+
+### 2.8 Use after installation
 
 Use natural-language tasks; no Python import is needed. State the goal, mode,
 Profiles, execution environment, and budget explicitly. For example:
@@ -358,7 +385,7 @@ The plugin may create `.research/` records in a target research project. It
 does not submit cluster jobs or consume paid resources as an automatic
 consequence of installation.
 
-### 2.8 Installation troubleshooting
+### 2.9 Installation troubleshooting
 
 | Symptom | Likely cause | Action |
 | --- | --- | --- |
@@ -367,6 +394,7 @@ consequence of installation.
 | Marketplace is visible but the plugin is not | Incorrect `source.path` or an extra directory level | Check that `~/plugins/research-engineering/.codex-plugin/plugin.json` exists |
 | Windows helper script rejects a safe write | Required POSIX file primitives are unavailable | Use WSL2; do not bypass the safety check |
 | Claude Code cannot find Skills | The plugin root was not passed at startup, or the Manifest/Skill has an error | Restart with `claude --plugin-dir <plugin-directory>` and inspect `/plugin` errors |
+| Qoder does not show the Skills | The repository root was installed instead of the exported package | Run `python3 scripts/export_qoder_plugin.py` and install `dist/research-engineering/` |
 | Changes do not appear | The host is using an old cache | Reinstall, restart the host, and create a new task |
 
 Troubleshoot in this order: CLI launch → Marketplace JSON → Manifest depth →

@@ -3,7 +3,7 @@
 > 语言： [English](../README.md) | 简体中文
 
 面向深度学习、大模型与 AI 基础设施研究的独立 Agent 插件，以 Codex 为主要
-宿主，并提供 Claude Code 兼容层。它采用规格驱动、隔离调试、独立审查和
+宿主，并提供 Claude Code 与 Qoder 兼容层。它采用规格驱动、隔离调试、独立审查和
 分层验证，同时根据研究阶段调整流程强度。首版以 PyTorch 生态为第一等支持
 对象。
 
@@ -31,6 +31,7 @@ code .
 |------|------|
 | `.codex-plugin/plugin.json` | Codex 插件名称、版本和入口 |
 | `.claude-plugin/plugin.json` | Claude Code 兼容层的名称、版本和描述 |
+| `.qoder-plugin/plugin.json` | Qoder 兼容层清单，由导出的 Qoder 安装包使用 |
 | `skills/*/SKILL.md` | 8 个共享核心 Skills 与 3 个可组合 Profiles |
 | `scripts/` | 初始化、环境捕获、运行记录和证据汇总工具 |
 | `templates/` | 研究上下文、实验、运行和审查模板 |
@@ -367,7 +368,32 @@ Claude 的长期 Marketplace 安装、升级和公开发布使用另一套 Marke
 与分发流程，本版本尚未完成该端到端验收。不要把本节的本地临时加载表述为
 “已经发布到 Claude Marketplace”。
 
-### 2.7 安装后如何使用
+### 2.7 安装到 Qoder
+
+Qoder 读取 `.qoder-plugin/plugin.json`，并从 `skills/` 加载 Skills。Qoder
+安装包不允许包含 `.codex-plugin`，且安装目录名必须与清单 `name` 一致，因此
+不要直接安装仓库根目录，先导出 Qoder 原生安装包：
+
+```bash
+python3 scripts/export_qoder_plugin.py --zip
+```
+
+该命令生成 `dist/research-engineering/` 目录和
+`dist/research-engineering-0.1.0.zip`，两者均通过离线结构校验。然后用
+`qodercli` 安装：
+
+```bash
+qodercli plugin install "$(pwd)/dist/research-engineering"
+qodercli plugin list
+qodercli skills list
+```
+
+在 Qoder IDE 中，可通过插件面板的“从本地安装”选择
+`dist/research-engineering/`。安装后 11 个 Skills 按名称可用，例如
+`using-research-workflows`。Qoder 会忽略 Codex 专用的
+`skills/*/agents/openai.yaml`，无需修改任何 Skill 文件。
+
+### 2.8 安装后如何使用
 
 插件通过自然语言任务触发，不需要导入 Python 模块。建议明确目标、模式、
 Profile、执行环境和预算。例如：
@@ -386,7 +412,7 @@ PyTorch 分类实验。先建立 .research 上下文和实验契约，只运行 
 插件可能在目标研究项目中创建 `.research/` 记录，但不会因为安装动作自动
 提交集群作业或使用付费资源。
 
-### 2.8 安装故障速查
+### 2.9 安装故障速查
 
 | 现象 | 最可能原因 | 处理方式 |
 |------|------------|----------|
@@ -395,6 +421,7 @@ PyTorch 分类实验。先建立 .research 上下文和实验契约，只运行 
 | Marketplace 可见但插件不可见 | `source.path` 错误或目录多套一层 | 确认 `~/plugins/research-engineering/.codex-plugin/plugin.json` 存在 |
 | Windows 辅助脚本拒绝安全写入 | 缺少所需 POSIX 文件原语 | 改在 WSL2 中运行，不要绕过安全检查 |
 | Claude Code 中没有插件 Skills | 启动时未传入插件根目录，或 Manifest/Skill 有错误 | 用 `claude --plugin-dir <插件目录>` 重启，再用 `/plugin` 查看 Errors |
+| Qoder 中看不到 Skills | 安装了仓库根目录而不是导出的安装包 | 运行 `python3 scripts/export_qoder_plugin.py`，安装 `dist/research-engineering/` |
 | 修改后行为未刷新 | 宿主仍在使用旧缓存 | 重新安装插件、重启宿主并创建新 task |
 
 排查顺序应为：CLI 能否启动 → Marketplace JSON 是否有效 → 插件 Manifest
